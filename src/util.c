@@ -93,3 +93,26 @@ bool patch_code(void *at, const void *bytes, size_t n)
     FlushInstructionCache(GetCurrentProcess(), at, n);
     return true;
 }
+
+bool iat_hook(const char *dll, const char *name, void *hook, void **orig)
+{
+    uint8_t *b = (uint8_t *)GetModuleHandleA(NULL);
+    IMAGE_NT_HEADERS64 *nt = (IMAGE_NT_HEADERS64 *)(b + ((IMAGE_DOS_HEADER *)b)->e_lfanew);
+    IMAGE_DATA_DIRECTORY dir = nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+    for (IMAGE_IMPORT_DESCRIPTOR *d = (void *)(b + dir.VirtualAddress); d->Name; d++) {
+        if (_stricmp((char *)b + d->Name, dll))
+            continue;
+        uint64_t *names = (uint64_t *)(b + d->OriginalFirstThunk), *iat = (uint64_t *)(b + d->FirstThunk);
+        for (int i = 0; names[i]; i++) {
+            if (names[i] >> 63 || strcmp((char *)b + names[i] + 2, name))
+                continue;
+            DWORD old;
+            VirtualProtect(&iat[i], 8, PAGE_READWRITE, &old);
+            *orig = (void *)iat[i];
+            iat[i] = (uint64_t)hook;
+            VirtualProtect(&iat[i], 8, old, &old);
+            return true;
+        }
+    }
+    return false;
+}

@@ -23,6 +23,10 @@ BOOL WINAPI DllMain(HINSTANCE self, DWORD reason, LPVOID r)
         fps_start(cfg("fps", "limit", 144));
     if (cfg("ultrawide", "enabled", 1))
         ultrawide_start();
+    if (cfg("animation", "enabled", 1))
+        animation_start();
+    if (cfg("loadbars", "enabled", 1))
+        loadbars_start();
     affinity_attach(self);
     log_line(LOG_INFO, "ember loaded");
     return TRUE;

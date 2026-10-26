@@ -16,10 +16,13 @@ void log_line(int level, const char *fmt, ...);
 // Code patches in the exe's executable sections.
 uint8_t *aob_find(const uint8_t *pattern, size_t n);
 bool patch_code(void *at, const void *bytes, size_t n);
+bool iat_hook(const char *dll, const char *name, void *hook, void **orig);
 
 // One start function per feature, each called once from DllMain.
 void eventpool_start(void);
 void sfx_start(void);
 void fps_start(int limit);
 void ultrawide_start(void);
+void animation_start(void);
+void loadbars_start(void);
 void affinity_attach(HINSTANCE instance);
