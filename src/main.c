@@ -27,6 +27,8 @@ BOOL WINAPI DllMain(HINSTANCE self, DWORD reason, LPVOID r)
         animation_start();
     if (cfg("loadbars", "enabled", 1))
         loadbars_start();
+    postfx_start(cfg("postfx", "remove_chromatic_aberration", 1), cfg("postfx", "remove_vignette", 1),
+                 cfg("postfx", "remove_sharpen", 1));
     affinity_attach(self);
     log_line(LOG_INFO, "ember loaded");
     return TRUE;

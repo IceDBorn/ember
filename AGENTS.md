@@ -30,7 +30,7 @@ ember is a Windows DLL for Elden Ring Nightreign, written in C and cross-compile
 There are no unit tests. Test in game:
 
 1. Load the DLL early from an me3 profile and set `[log] level=info`.
-2. Check `ember.log`: `eventpool import hooks 2 of 2`, `fps limit`, `ultrawide aspect check skipped`, `animation frustum widened`, `loadbars LoadingScreen vtable at` and `loadbars hooked swapchain`, and `sfx patched` with a row count. At `debug`, eventpool logs reused and created events every minute; after loading, `created` should stay near 0.
+2. Check `ember.log`: `eventpool import hooks 2 of 2`, `fps limit`, `ultrawide aspect check skipped`, `animation frustum widened`, `loadbars LoadingScreen vtable at` and `loadbars hooked swapchain`, five `postfx ... removed` lines, and `sfx patched` with a row count. At `debug`, eventpool logs reused and created events every minute; after loading, `created` should stay near 0.
 3. For performance changes, compare average fps, 1% low frame time and main thread CPU per frame on the same scene and save, with at least 5 runs per variant, interleaved.
 
 Afterwards set the log level back to `error`.

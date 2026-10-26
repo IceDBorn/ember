@@ -25,4 +25,5 @@ void fps_start(int limit);
 void ultrawide_start(void);
 void animation_start(void);
 void loadbars_start(void);
+void postfx_start(bool chromatic, bool vignette, bool sharpen);
 void affinity_attach(HINSTANCE instance);
