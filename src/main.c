@@ -19,6 +19,10 @@ BOOL WINAPI DllMain(HINSTANCE self, DWORD reason, LPVOID r)
         eventpool_start();
     if (cfg("sfx", "enabled", 1))
         sfx_start();
+    if (cfg("fps", "limit", 144) > 0)
+        fps_start(cfg("fps", "limit", 144));
+    if (cfg("ultrawide", "enabled", 1))
+        ultrawide_start();
     affinity_attach(self);
     log_line(LOG_INFO, "ember loaded");
     return TRUE;

@@ -13,7 +13,13 @@ int cfg(const char *section, const char *key, int def);
 void log_init(void);
 void log_line(int level, const char *fmt, ...);
 
+// Code patches in the exe's executable sections.
+uint8_t *aob_find(const uint8_t *pattern, size_t n);
+bool patch_code(void *at, const void *bytes, size_t n);
+
 // One start function per feature, each called once from DllMain.
 void eventpool_start(void);
 void sfx_start(void);
+void fps_start(int limit);
+void ultrawide_start(void);
 void affinity_attach(HINSTANCE instance);

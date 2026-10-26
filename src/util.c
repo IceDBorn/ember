@@ -66,3 +66,30 @@ void log_line(int level, const char *fmt, ...)
     }
     LeaveCriticalSection(&log_lock);
 }
+
+uint8_t *aob_find(const uint8_t *pat, size_t n)
+{
+    uint8_t *base = (uint8_t *)GetModuleHandleA(NULL);
+    IMAGE_NT_HEADERS *nt = (IMAGE_NT_HEADERS *)(base + ((IMAGE_DOS_HEADER *)base)->e_lfanew);
+    IMAGE_SECTION_HEADER *s = IMAGE_FIRST_SECTION(nt);
+    for (int i = 0; i < nt->FileHeader.NumberOfSections; i++, s++) {
+        if (!(s->Characteristics & IMAGE_SCN_MEM_EXECUTE) || s->Misc.VirtualSize < n)
+            continue;
+        uint8_t *p = base + s->VirtualAddress, *end = p + s->Misc.VirtualSize - n;
+        for (; p <= end; p++)
+            if (*p == pat[0] && !memcmp(p, pat, n))
+                return p;
+    }
+    return NULL;
+}
+
+bool patch_code(void *at, const void *bytes, size_t n)
+{
+    DWORD old;
+    if (!VirtualProtect(at, n, PAGE_EXECUTE_READWRITE, &old))
+        return false;
+    memcpy(at, bytes, n);
+    VirtualProtect(at, n, old, &old);
+    FlushInstructionCache(GetCurrentProcess(), at, n);
+    return true;
+}
