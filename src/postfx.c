@@ -22,9 +22,9 @@ static uint8_t *find_wstr(const wchar_t *str)
     return NULL;
 }
 
-// The game registers each effect under a "GS Presents - ..." label passed in r9.
-// NOPing that `lea r9, [label]` stops the effect, as the original mods do.
-static bool nop_label(const wchar_t *label)
+// The game registers each effect under a "GS Presents - ..." label passed in r9, and an unknown label leaves
+// it off. The callee reads the string, so `lea r9` moves 2 characters into the label instead of becoming NOPs.
+static bool rename_label(const wchar_t *label)
 {
     uint8_t *str = find_wstr(label);
     if (!str)
@@ -32,7 +32,6 @@ static bool nop_label(const wchar_t *label)
     uint8_t *base = (uint8_t *)GetModuleHandleA(NULL);
     IMAGE_NT_HEADERS *nt = (IMAGE_NT_HEADERS *)(base + ((IMAGE_DOS_HEADER *)base)->e_lfanew);
     IMAGE_SECTION_HEADER *s = IMAGE_FIRST_SECTION(nt);
-    static const uint8_t nops[7] = {0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
     for (int i = 0; i < nt->FileHeader.NumberOfSections; i++, s++) {
         if (!(s->Characteristics & IMAGE_SCN_MEM_EXECUTE) || s->Misc.VirtualSize < 7)
             continue;
@@ -43,7 +42,8 @@ static bool nop_label(const wchar_t *label)
             int32_t rel;
             memcpy(&rel, p + 3, 4);
             if (p + 7 + rel == str) {
-                bool ok = patch_code(p, nops, sizeof nops);
+                rel += 2 * sizeof(wchar_t);
+                bool ok = patch_code(p + 3, &rel, sizeof rel);
                 log_line(ok ? LOG_INFO : LOG_ERROR, "postfx %ls %s at %p", label,
                          ok ? "removed" : "patch failed", p);
                 return ok;
@@ -55,7 +55,7 @@ static bool nop_label(const wchar_t *label)
 
 static void drop(const wchar_t *label)
 {
-    if (!nop_label(label))
+    if (!rename_label(label))
         log_line(LOG_ERROR, "postfx %ls not found", label);
 }
 
