@@ -9,6 +9,8 @@ enum { LOG_OFF, LOG_ERROR, LOG_WARN, LOG_INFO, LOG_DEBUG };
 // util.c: paths next to ember.dll, settings and the log.
 void mod_dir_init(HINSTANCE self);
 void mod_path(char *out, const char *name);
+// Writes the built-in ember.ini when none exists. Needs mod_dir_init first.
+void cfg_write_default(void);
 int cfg(const char *section, const char *key, int def);
 void log_init(void);
 void log_line(int level, const char *fmt, ...);

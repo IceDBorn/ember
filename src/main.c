@@ -14,6 +14,7 @@ BOOL WINAPI DllMain(HINSTANCE self, DWORD reason, LPVOID r)
     if (_stricmp(exe + n, "nightreign.exe"))
         return TRUE;
     mod_dir_init(self);
+    cfg_write_default();
     log_init();
     if (cfg("eventpool", "enabled", 1))
         eventpool_start();

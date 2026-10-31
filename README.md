@@ -36,7 +36,7 @@ path = "dll/ember.dll"
 load_early = true
 ```
 
-ember reads `ember.ini` from the folder that holds the DLL and writes `ember.log` there. Missing keys keep their defaults.
+ember reads `ember.ini` from the folder that holds the DLL and writes `ember.log` there. Missing keys keep their defaults. If `ember.ini` is missing, ember writes one with the defaults at launch.
 
 eventpool uses code addresses from one build of `nightreign.exe`. If a game update moves them, eventpool's hooks pass every call through unchanged, and the log shows no pooled events. The sfx and affinity fixes do not depend on the game build. If an update changes the fps, ultrawide, animation or postfx code, ember logs an error and leaves it alone.
 

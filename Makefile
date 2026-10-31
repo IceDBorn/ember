@@ -7,7 +7,7 @@ HEADERS = $(wildcard src/*.h src/affinity/*.h)
 
 all: ember.dll
 
-ember.dll: $(SRC) $(HEADERS)
+ember.dll: $(SRC) $(HEADERS) ember.ini
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(SRC) -lkernel32
 
 clean:

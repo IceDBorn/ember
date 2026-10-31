@@ -12,7 +12,7 @@ ember is a Windows DLL for Elden Ring Nightreign, written in C and cross-compile
 ## Code
 
 - Each fix is one file in `src/` with a `<fix>_start()` function, declared in `src/ember.h` and called from `DllMain` in `src/main.c` when its `[<fix>] enabled` key is 1.
-- Settings are read with `cfg(section, key, default)` from `ember.ini` next to the DLL. A new key also needs a line in `ember.ini` and in the README settings table.
+- Settings are read with `cfg(section, key, default)` from `ember.ini` next to the DLL. A new key also needs a line in `ember.ini`, which the build embeds and writes out when the file is missing, and in the README settings table.
 - Log with `log_line(level, ...)` into `ember.log`. Keep per-call or per-frame output at `LOG_DEBUG`.
 - Game code addresses are absolute (the exe loads at 0x140000000). Name what an address is in a short comment. Prefer finding data at runtime, as `sfx.c` does, over hard-coded addresses.
 - `src/affinity/` is vendored Apache-2.0 code. Keep its upstream style, and list every change in the comment at the top of `affinity_fix.c`.

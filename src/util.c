@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "ember.h"
 
@@ -22,6 +23,32 @@ void mod_dir_init(HINSTANCE self)
 void mod_path(char *out_path, const char *name)
 {
     snprintf(out_path, MAX_PATH, "%s%s", mod_dir, name);
+}
+
+// ember.ini from the repo root, built in so a missing file can be written out.
+__asm__(".section .rdata,\"dr\"\ndefault_ini:\n.incbin \"ember.ini\"\n.byte 0\n.text\n");
+extern const char default_ini[];
+
+void cfg_write_default(void)
+{
+    char path[MAX_PATH];
+    mod_path(path, "ember.ini");
+    HANDLE h = CreateFileA(path, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE)
+        return;
+    size_t len = strlen(default_ini), k = 0;
+    char *crlf = malloc(len * 2);
+    if (crlf) {
+        for (size_t i = 0; i < len; i++) {
+            if (default_ini[i] == '\n' && (!i || default_ini[i - 1] != '\r'))
+                crlf[k++] = '\r';
+            crlf[k++] = default_ini[i];
+        }
+        DWORD n;
+        WriteFile(h, crlf, (DWORD)k, &n, NULL);
+        free(crlf);
+    }
+    CloseHandle(h);
 }
 
 int cfg(const char *section, const char *key, int def)
