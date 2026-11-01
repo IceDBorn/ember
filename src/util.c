@@ -58,7 +58,7 @@ int cfg(const char *section, const char *key, int def)
     return (int)GetPrivateProfileIntA(section, key, def, ini);
 }
 
-// The log only holds this launch: an old one is removed even when nothing gets written.
+// Keeps the last ten launches: ember.log is this one, ember.log.1 the one before, up to .9.
 void log_init(void)
 {
     char ini[MAX_PATH], v[16];
@@ -69,7 +69,16 @@ void log_init(void)
         if (!_stricmp(v, level_names[i]))
             log_level = i;
     mod_path(log_file, "ember.log");
-    DeleteFileA(log_file);
+    char from[MAX_PATH + 8], to[MAX_PATH + 8];
+    for (int i = 9; i > 0; i--) {
+        snprintf(from, sizeof from, i > 1 ? "%s.%d" : "%s", log_file, i - 1);
+        snprintf(to, sizeof to, "%s.%d", log_file, i);
+        MoveFileExA(from, to, MOVEFILE_REPLACE_EXISTING);
+    }
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    log_line(LOG_INFO, "Log started %04d-%02d-%02d pid=%lu level=%s", st.wYear, st.wMonth, st.wDay,
+             GetCurrentProcessId(), level_names[log_level]);
 }
 
 void log_line(int level, const char *fmt, ...)

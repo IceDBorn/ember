@@ -65,16 +65,20 @@ static BOOL WINAPI h_close(HANDLE h)
         return o_close(h);
     AcquireSRWLockExclusive(&lock);
     int i = slot(h, 0), m = i >= 0 ? known_manual[i] : 0;
-    int ok = i >= 0 && npool[m] < POOL;
+    ReleaseSRWLockExclusive(&lock);
+    if (i < 0)
+        return o_close(h);
+    o_reset(h);
+    // The room check and the push share one lock hold: threads racing past a full pool would write past its end.
+    AcquireSRWLockExclusive(&lock);
+    int ok = npool[m] < POOL;
+    if (ok)
+        pool[m][npool[m]++] = h;
     ReleaseSRWLockExclusive(&lock);
     if (!ok) {
         InterlockedIncrement64(&closed);
         return o_close(h);
     }
-    o_reset(h);
-    AcquireSRWLockExclusive(&lock);
-    pool[m][npool[m]++] = h;
-    ReleaseSRWLockExclusive(&lock);
     InterlockedIncrement64(&parked);
     return TRUE;
 }
